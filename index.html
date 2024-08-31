@@ -21,7 +21,7 @@
       formData.append('files', files[i]);
     }
 
-    fetch('http://localhost:8080/index/accept_file', {
+    fetch('http://127.0.0.1:4040/index/accept_file', {
       method: 'POST',
       body: formData
     })
