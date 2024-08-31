@@ -4,6 +4,20 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>目录上传示例</title>
+  <style>
+    /* 简单的弹出窗口样式 */
+    #uploadPopup {
+      display: none;
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      padding: 20px;
+      background-color: #fff;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      z-index: 1000;
+    }
+  </style>
 </head>
 <body>
 <h1>上传目录</h1>
@@ -12,8 +26,14 @@
   <button type="button" onclick="uploadDirectory()">上传目录</button>
 </form>
 
+<div id="uploadPopup">上传中...</div> <!-- 上传中的弹出窗口 -->
+
 <script>
   function uploadDirectory() {
+    // 显示上传中弹出窗口
+    const popup = document.getElementById('uploadPopup');
+    popup.style.display = 'block';
+
     const formData = new FormData();
     const files = document.getElementById('file').files;
 
@@ -28,9 +48,13 @@
             .then(response => response.text())
             .then(result => {
               alert(result);
+              // 隐藏上传中弹出窗口
+              popup.style.display = 'none';
             })
             .catch(error => {
               console.error('上传错误:', error);
+              // 隐藏上传中弹出窗口
+              popup.style.display = 'none';
             });
   }
 </script>
