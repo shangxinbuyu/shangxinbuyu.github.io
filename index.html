@@ -16,6 +16,7 @@
       background-color: #fff;
       box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
       z-index: 1000;
+      text-align: center;
     }
   </style>
 </head>
@@ -32,65 +33,82 @@
   <button type="button" onclick="uploadFile()">上传文件</button>
 </form>
 
-<div id="uploadPopup">上传中...</div> <!-- 上传中的弹出窗口 -->
+<div id="uploadPopup">上传中... <br> <progress id="uploadProgress" max="100" value="0"></progress></div> <!-- 上传中的弹出窗口 -->
 
 <script>
-  function uploadDirectory() {
-    // 显示上传中弹出窗口
+  async function uploadFiles(url, files) {
     const popup = document.getElementById('uploadPopup');
+    const progress = document.getElementById('uploadProgress');
     popup.style.display = 'block';
+    
+    let totalFiles = files.length;
+    let uploadedFiles = 0;
+    let success = true;
 
-    const formData = new FormData();
-    const directory = document.getElementById('directory').files;
+    for (let i = 0; i < totalFiles; i++) {
+      const file = files[i];
+      const formData = new FormData();
+      formData.append('files', file);
+      formData.append('currentFileNumber', i + 1); // 当前文件数，从1开始
+      formData.append('totalFileNumber', totalFiles); // 总文件数
 
-    for (let i = 0; i < directory.length; i++) {
-      formData.append('files', directory[i]);
+      try {
+        const xhr = new XMLHttpRequest();
+        xhr.open('POST', url, true);
+
+        xhr.upload.onprogress = function (event) {
+          if (event.lengthComputable) {
+            const percentComplete = ((uploadedFiles + (event.loaded / event.total)) / totalFiles) * 100;
+            progress.value = percentComplete;
+          }
+        };
+
+        xhr.onload = function () {
+          if (xhr.status === 200) {
+            uploadedFiles++;
+            progress.value = (uploadedFiles / totalFiles) * 100;
+
+            if (uploadedFiles === totalFiles) {
+              alert('所有文件上传完成');
+              popup.style.display = 'none';
+            }
+          } else {
+            success = false;
+            throw new Error('上传失败: ' + xhr.statusText);
+          }
+        };
+
+        xhr.onerror = function () {
+          success = false;
+          throw new Error('上传错误: ' + xhr.statusText);
+        };
+
+        xhr.send(formData);
+        
+        // 等待当前文件上传完成
+        await new Promise((resolve, reject) => {
+          xhr.onloadend = resolve;
+          xhr.onerror = reject;
+        });
+        
+        if (!success) break; // 如果上传失败，则停止处理后续文件
+      } catch (error) {
+        console.error(error);
+        alert(error.message);
+        popup.style.display = 'none';
+        break;
+      }
     }
+  }
 
-    fetch('https://intimate-huge-oryx.ngrok-free.app/index/accept_folder',  {
-      method: 'POST',
-      body: formData
-    })
-            .then(response => response.text())
-            .then(result => {
-              alert(result);
-              // 隐藏上传中弹出窗口
-              popup.style.display = 'none';
-            })
-            .catch(error => {
-              console.error('上传错误:', error);
-              // 隐藏上传中弹出窗口
-              popup.style.display = 'none';
-            });
+  function uploadDirectory() {
+    const directory = document.getElementById('directory').files;
+    uploadFiles('https://intimate-huge-oryx.ngrok-free.app/index/accept_folder', directory);
   }
 
   function uploadFile() {
-    // 显示上传中弹出窗口
-    const popup = document.getElementById('uploadPopup');
-    popup.style.display = 'block';
-
-    const formData = new FormData();
     const file = document.getElementById('singleFile').files;
-
-    for (let i = 0; i < file.length; i++) {
-      formData.append('files', file[i]);
-    }
-
-    fetch('https://intimate-huge-oryx.ngrok-free.app/index/accept_file',  {
-      method: 'POST',
-      body: formData
-    })
-            .then(response => response.text())
-            .then(result => {
-              alert(result);
-              // 隐藏上传中弹出窗口
-              popup.style.display = 'none';
-            })
-            .catch(error => {
-              console.error('上传错误:', error);
-              // 隐藏上传中弹出窗口
-              popup.style.display = 'none';
-            });
+    uploadFiles('https://intimate-huge-oryx.ngrok-free.app/index/accept_file', file);
   }
 </script>
 </body>
