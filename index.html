@@ -48,7 +48,6 @@
     const uploadTasks = Array.from(files).map(file => {
       const formData = new FormData();
       formData.append('files', file);
-      // 删除了 totalFileNumber
 
       return new Promise((resolve, reject) => {
         const xhr = new XMLHttpRequest();
@@ -92,11 +91,19 @@
 
   function uploadDirectory() {
     const directory = document.getElementById('directory').files;
+    if (directory.length === 0) {
+      alert('请选择目录中的文件进行上传');
+      return;
+    }
     uploadFiles('https://intimate-huge-oryx.ngrok-free.app/index/accept_folder', directory);
   }
 
   function uploadFile() {
     const file = document.getElementById('singleFile').files;
+    if (file.length === 0) {
+      alert('请选择文件进行上传');
+      return;
+    }
     uploadFiles('https://intimate-huge-oryx.ngrok-free.app/index/accept_file', file);
   }
 </script>
