@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>目录上传示例</title>
+</head>
+<body>
+<h1>上传目录</h1>
+<form id="uploadForm">
+  <input type="file" name="file" id="file" webkitdirectory>
+  <button type="button" onclick="uploadDirectory()">上传目录</button>
+</form>
+
+<script>
+  function uploadDirectory() {
+    const formData = new FormData();
+    const files = document.getElementById('file').files;
+
+    for (let i = 0; i < files.length; i++) {
+      formData.append('files', files[i]);
+    }
+
+    fetch('http://localhost:8080/index/accept_file', {
+      method: 'POST',
+      body: formData
+    })
+            .then(response => response.text())
+            .then(result => {
+              alert(result);
+            })
+            .catch(error => {
+              console.error('上传错误:', error);
+            });
+  }
+</script>
+</body>
+</html>
