@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>目录上传示例</title>
+  <title>文件上传示例</title>
   <style>
     /* 简单的弹出窗口样式 */
     #uploadPopup {
@@ -20,10 +20,16 @@
   </style>
 </head>
 <body>
-<h1>上传目录</h1>
+<h1>上传文件</h1>
 <form id="uploadForm">
-  <input type="file" name="file" id="file" webkitdirectory>
+  <!-- 目录上传选项 -->
+  <input type="file" name="directory" id="directory" webkitdirectory multiple>
   <button type="button" onclick="uploadDirectory()">上传目录</button>
+
+  <br>
+  <!-- 单个文件上传选项 -->
+  <input type="file" name="file" id="singleFile" multiple>
+  <button type="button" onclick="uploadFile()">上传文件</button>
 </form>
 
 <div id="uploadPopup">上传中...</div> <!-- 上传中的弹出窗口 -->
@@ -35,13 +41,42 @@
     popup.style.display = 'block';
 
     const formData = new FormData();
-    const files = document.getElementById('file').files;
+    const directory = document.getElementById('directory').files;
 
-    for (let i = 0; i < files.length; i++) {
-      formData.append('files', files[i]);
+    for (let i = 0; i < directory.length; i++) {
+      formData.append('files', directory[i]);
     }
 
-    fetch('https://a0e6-111-55-96-27.ngrok-free.app/index/accept_file', {
+    fetch('https://a0e6-111-55-96-27.ngrok-free.app/index/accept_folder',  {
+      method: 'POST',
+      body: formData
+    })
+            .then(response => response.text())
+            .then(result => {
+              alert(result);
+              // 隐藏上传中弹出窗口
+              popup.style.display = 'none';
+            })
+            .catch(error => {
+              console.error('上传错误:', error);
+              // 隐藏上传中弹出窗口
+              popup.style.display = 'none';
+            });
+  }
+
+  function uploadFile() {
+    // 显示上传中弹出窗口
+    const popup = document.getElementById('uploadPopup');
+    popup.style.display = 'block';
+
+    const formData = new FormData();
+    const file = document.getElementById('singleFile').files;
+
+    for (let i = 0; i < file.length; i++) {
+      formData.append('files', file[i]);
+    }
+
+    fetch('https://a0e6-111-55-96-27.ngrok-free.app/index/accept_file',  {
       method: 'POST',
       body: formData
     })
